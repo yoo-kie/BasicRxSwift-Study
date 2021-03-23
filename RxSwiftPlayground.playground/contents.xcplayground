@@ -4,6 +4,7 @@
         <page name='Introduction'/>
         <page name='Observable'/>
         <page name='Subjects'/>
-        <page name='Operator'/>
+        <page name='Create Operator'/>
+        <page name='Operator2'/>
     </pages>
 </playground>
