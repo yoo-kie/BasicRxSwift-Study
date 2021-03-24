@@ -120,4 +120,56 @@ import RxSwift
 //     sample   : --0--2--3|
 //     */
 //}
+
+//example(of: "skip") {
+//    let observable = Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
+//
+//    observable
+//        .skip(3)
+//        .take(3)
+//        .debug()
+//        .subscribe()
+//}
+
+//example(of: "take") {
+//    let observable = Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
+//
+//    observable
+//        .take(3)
+//        .debug()
+//        .subscribe()
+//}
+
+//example(of: "skipWhile") {
+//    let observable = Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
+//
+//    observable
+//        .take(10)
+//        .skip(while: { $0 < 5 })
+//        .debug()
+//        .subscribe()
+//}
+
+//example(of: "takeWhile") {
+//    let observable = Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
+//
+//    observable
+//        .take(while: { $0 < 5 })
+//        .debug()
+//        .subscribe()
+//}
+
+//example(of: "skipUntil & takeUntil") {
+//    let observable = Observable<Int>.interval(.seconds(1), scheduler: MainScheduler.instance)
+//
+//    observable
+//        .skip(
+//            until: Observable<Int>.interval(.seconds(3), scheduler: MainScheduler.instance)
+//        )
+//        .take(
+//            until: Observable<Int>.interval(.seconds(6), scheduler: MainScheduler.instance)
+//        )
+//        .debug()
+//        .subscribe()
+//}
 //: [Next](@next)
