@@ -6,79 +6,78 @@
 //
 
 import UIKit
-
-// BehaviorSubject
-class BehaviorSubject<T> {
-    private var observers: [(T) -> Void] = []
-    private var latestEvent: T
-
-    init(initialEvent: T) {
-        self.latestEvent = initialEvent
-    }
-
-    func onNext(event: T) {
-        latestEvent = event
-        observers.forEach {
-            $0(event)
-        }
-    }
-
-    func subscribe(observer: @escaping (T) -> Void) {
-        observer(latestEvent)
-        observers.append(observer)
-    }
-}
-
-// ReplaySubject
-class ReplaySubject<T> {
-    private var observers: [(T) -> Void] = []
-    private var events: [T] = []
-    private var bufferSize: Int
-
-    init(bufferSize: Int = 0) {
-        self.bufferSize = bufferSize
-    }
-    
-    static func createUnbound() {
-        
-    }
-    
-    func onNext(event: T) {
-        insertToBuffer(event: event)
-        
-        observers.forEach {
-            $0(event)
-        }
-    }
-
-    func subscribe(observer: @escaping (T) -> Void) {
-        emitFromBuffer(observer: observer)
-        
-        observers.append(observer)
-    }
-    
-    private func insertToBuffer(event: T) {
-        if bufferSize != 0 && events.count > bufferSize {
-            events.removeFirst()
-        }
-        
-        events.append(event)
-    }
-    
-    private func emitFromBuffer(observer: @escaping (T) -> Void) {
-        events.forEach {
-            observer($0)
-        }
-    }
-}
+import RxSwift
+import RxCocoa
 
 class ViewController: UIViewController {
 
+    private let disposeBag = DisposeBag()
+    lazy var rxSwitch: UISwitch = {
+        let mySwitch: UISwitch = UISwitch()
+        self.view.addSubview(mySwitch)
+        mySwitch.translatesAutoresizingMaskIntoConstraints = false
+        mySwitch.topAnchor.constraint(
+            equalTo: self.view.safeAreaLayoutGuide.topAnchor,
+            constant: 10
+        ).isActive = true
+        mySwitch.leftAnchor.constraint(
+            equalTo: self.view.safeAreaLayoutGuide.leftAnchor,
+            constant: 10
+        ).isActive = true
+        
+        return mySwitch
+    }()
+    lazy var titleLabel: UILabel = {
+        let myLabel = UILabel()
+        self.view.addSubview(myLabel)
+        myLabel.translatesAutoresizingMaskIntoConstraints = false
+        myLabel.topAnchor.constraint(
+            equalTo: self.rxSwitch.safeAreaLayoutGuide.bottomAnchor,
+            constant: 10
+        ).isActive = true
+        myLabel.leftAnchor.constraint(
+            equalTo: self.view.safeAreaLayoutGuide.leftAnchor,
+            constant: 10
+        ).isActive = true
+        
+        return myLabel
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-    }
+        
+        // sequence가 있을 때-!
+        rxSwitch.rx.isOn.map { $0 ? "ON" : "OFF" }
+            .subscribe(
+                onNext: { self.titleLabel.text = $0 }
+            )
+            .disposed(by: disposeBag)
 
+        rxSwitch.rx.isOn.map { $0 ? "ON" : "OFF" }
+            .subscribe(titleLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        // 적합-!
+        rxSwitch.rx.isOn.map { $0 ? "ON" : "OFF" }
+            .bind(to: titleLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        // 좀 더 UI작업이 명확할 때?
+        let observable = Observable<Int>
+            .create { observer -> Disposable in
+                observer.onNext(1)
+                observer.onNext(2)
+                observer.onNext(3)
+                observer.onError(NSError(domain: "", code: 100, userInfo: nil))
+                return Disposables.create { }
+        }
+
+        let driver = observable.asDriver(onErrorJustReturn: 404)
+        driver
+            .map { "\($0)" }
+            .drive(titleLabel.rx.text)
+            .disposed(by: disposeBag)
+    }
 
 }
 
